@@ -5,9 +5,13 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState('home');
+  const [selectedChat, setSelectedChat] = useState(1);
+  const [messageInput, setMessageInput] = useState('');
 
   const stats = {
     level: 47,
@@ -51,6 +55,29 @@ const Index = () => {
     { id: 'rating', label: 'Рейтинг', icon: 'Trophy' },
     { id: 'friends', label: 'Друзья', icon: 'UserPlus', badge: 3 },
   ];
+
+  const chatList = [
+    { id: 1, name: 'Team Alpha', avatar: '🎮', lastMessage: 'Собираемся на турнир?', time: '2 мин', unread: 3, online: true },
+    { id: 2, name: 'CyberNinja', avatar: '⚡', lastMessage: 'GG, отличная игра!', time: '15 мин', unread: 0, online: true },
+    { id: 3, name: 'Pro Squad', avatar: '🏆', lastMessage: 'Когда следующий матч?', time: '1 ч', unread: 2, online: false },
+    { id: 4, name: 'GameMaster', avatar: '🎯', lastMessage: 'Добавил новые скины', time: '3 ч', unread: 0, online: false },
+    { id: 5, name: 'Tournament Chat', avatar: '👑', lastMessage: 'Регистрация открыта!', time: 'вчера', unread: 1, online: true },
+  ];
+
+  const messages = [
+    { id: 1, sender: 'CyberNinja', avatar: '⚡', text: 'Привет! Готов к новому турниру?', time: '14:32', isMine: false },
+    { id: 2, sender: 'Я', avatar: 'PG', text: 'Да, уже разминаюсь! Когда начало?', time: '14:33', isMine: true },
+    { id: 3, sender: 'CyberNinja', avatar: '⚡', text: 'Через 30 минут. Собираем команду из 5 человек', time: '14:35', isMine: false },
+    { id: 4, sender: 'Я', avatar: 'PG', text: 'Отлично! Я позову еще пару игроков', time: '14:36', isMine: true },
+    { id: 5, sender: 'CyberNinja', avatar: '⚡', text: 'Кстати, призовой фонд 100к! 💰', time: '14:37', isMine: false },
+    { id: 6, sender: 'Я', avatar: 'PG', text: 'Вау! Тогда точно не пропустим 🔥', time: '14:38', isMine: true },
+  ];
+
+  const handleSendMessage = () => {
+    if (messageInput.trim()) {
+      setMessageInput('');
+    }
+  };
 
   const getRarityColor = (rarity: string) => {
     switch (rarity) {
@@ -146,6 +173,135 @@ const Index = () => {
           </header>
 
           <div className="p-6 space-y-6">
+            {activeSection === 'chats' && (
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-12rem)]">
+                <Card className="lg:col-span-4 p-0 flex flex-col overflow-hidden">
+                  <div className="p-4 border-b border-border">
+                    <Input 
+                      placeholder="Поиск чатов..." 
+                      className="bg-muted border-0"
+                    />
+                  </div>
+                  <ScrollArea className="flex-1">
+                    <div className="p-2">
+                      {chatList.map(chat => (
+                        <button
+                          key={chat.id}
+                          onClick={() => setSelectedChat(chat.id)}
+                          className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all duration-200 mb-1 ${
+                            selectedChat === chat.id 
+                              ? 'bg-primary/20 border border-primary' 
+                              : 'hover:bg-muted'
+                          }`}
+                        >
+                          <div className="relative">
+                            <div className="text-3xl">{chat.avatar}</div>
+                            {chat.online && (
+                              <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-success rounded-full border-2 border-card" />
+                            )}
+                          </div>
+                          <div className="flex-1 text-left min-w-0">
+                            <div className="flex items-center justify-between">
+                              <span className="font-semibold text-sm truncate">{chat.name}</span>
+                              <span className="text-xs text-muted-foreground ml-2">{chat.time}</span>
+                            </div>
+                            <p className="text-xs text-muted-foreground truncate">{chat.lastMessage}</p>
+                          </div>
+                          {chat.unread > 0 && (
+                            <Badge className="bg-secondary text-white animate-pulse-glow">
+                              {chat.unread}
+                            </Badge>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </Card>
+
+                <Card className="lg:col-span-8 p-0 flex flex-col overflow-hidden">
+                  <div className="p-4 border-b border-border flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="text-3xl">
+                        {chatList.find(c => c.id === selectedChat)?.avatar}
+                      </div>
+                      <div>
+                        <h3 className="font-semibold">
+                          {chatList.find(c => c.id === selectedChat)?.name}
+                        </h3>
+                        <p className="text-xs text-muted-foreground">
+                          {chatList.find(c => c.id === selectedChat)?.online ? 'В сети' : 'Не в сети'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="ghost" size="icon">
+                        <Icon name="Phone" size={20} />
+                      </Button>
+                      <Button variant="ghost" size="icon">
+                        <Icon name="Video" size={20} />
+                      </Button>
+                      <Button variant="ghost" size="icon">
+                        <Icon name="MoreVertical" size={20} />
+                      </Button>
+                    </div>
+                  </div>
+
+                  <ScrollArea className="flex-1 p-4">
+                    <div className="space-y-4">
+                      {messages.map(msg => (
+                        <div
+                          key={msg.id}
+                          className={`flex gap-3 ${msg.isMine ? 'flex-row-reverse' : 'flex-row'}`}
+                        >
+                          <Avatar className="w-10 h-10">
+                            <AvatarFallback className={msg.isMine ? 'bg-primary text-white' : 'bg-muted'}>
+                              {msg.avatar}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className={`flex flex-col ${msg.isMine ? 'items-end' : 'items-start'} max-w-[70%]`}>
+                            <div className={`px-4 py-2 rounded-2xl ${
+                              msg.isMine 
+                                ? 'bg-gradient-to-br from-primary to-accent text-white' 
+                                : 'bg-muted'
+                            }`}>
+                              <p className="text-sm">{msg.text}</p>
+                            </div>
+                            <span className="text-xs text-muted-foreground mt-1">{msg.time}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+
+                  <div className="p-4 border-t border-border">
+                    <div className="flex gap-2">
+                      <Button variant="ghost" size="icon">
+                        <Icon name="Paperclip" size={20} />
+                      </Button>
+                      <Button variant="ghost" size="icon">
+                        <Icon name="Image" size={20} />
+                      </Button>
+                      <Input
+                        placeholder="Написать сообщение..."
+                        value={messageInput}
+                        onChange={(e) => setMessageInput(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                        className="flex-1"
+                      />
+                      <Button 
+                        onClick={handleSendMessage}
+                        className="bg-gradient-to-r from-primary to-accent"
+                      >
+                        <Icon name="Send" size={20} />
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+            )}
+
+            {activeSection === 'home' && (
+              <>
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
               <Card className="p-6 bg-gradient-to-br from-primary to-primary/80 border-0 text-white animate-fade-in">
                 <div className="flex items-center justify-between mb-3">
@@ -306,6 +462,8 @@ const Index = () => {
                 </div>
               </Card>
             </div>
+              </>
+            )}
           </div>
         </main>
       </div>
